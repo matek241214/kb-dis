@@ -1,32 +1,50 @@
-# Knockback Displacement (Fabric 1.21.11)
+plugins {
+	id 'fabric-loom' version "${loom_version}"
+	id 'maven-publish'
+}
 
-Mod zamienia vanillowy knockback (zmiana velocity) na bezpośrednie przesunięcie trafionej istoty o stały dystans, z respektowaniem kolizji.
+version = project.mod_version
+group = project.maven_group
 
-## Budowanie
+base {
+	archivesName = project.archives_base_name
+}
 
-Wymagania: JDK 21.
+// Płaski układ repo: pliki .java i .json leżą w głównym katalogu
+sourceSets {
+	main {
+		java {
+			srcDirs = ['.']
+			include '*.java'
+		}
+		resources {
+			srcDirs = ['.']
+			include 'fabric.mod.json', 'knockback-displacement.mixins.json'
+		}
+	}
+}
 
-```
-gradle build        # lub ./gradlew build, jeśli skopiujesz wrapper z szablonu Fabric
-```
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
 
-Gotowy plik jest w `build/libs/knockback-displacement-1.0.0.jar`. Wrzuć go do `mods/` razem z Fabric API.
+processResources {
+	inputs.property "version", project.version
 
-## GUI
+	filesMatching("fabric.mod.json") {
+		expand "version": project.version
+	}
+}
 
-W grze wpisz `/kbd`, otworzy się ekran z suwakami mocy i podniesienia oraz przyciskiem włącz/wyłącz. Zmiany zapisują się po kliknięciu Gotowe. Działa w singleplayerze i na własnym serwerze/LAN; na cudzym serwerze liczy się config serwera.
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 21
+}
 
-## Jar bez instalowania niczego
-
-Wrzuć folder na GitHub (publiczne lub prywatne repo). Zakładka Actions -> build zbuduje jar do pobrania w Artifacts.
-
-## Config
-
-`config/knockback-displacement.json` (tworzy się przy pierwszym uruchomieniu):
-
-- `enabled` - włącza/wyłącza mod
-- `blocksPerStrength` - bloki przesunięcia na 1.0 siły (vanilla siła to 0.4, więc domyślnie ok. 1.2 bloku)
-- `verticalLift` - dodatkowe przesunięcie w górę
-- `respectKnockbackResistance` - czy resistance zmniejsza dystans
-- `affectPlayers` / `affectMobs` - na kogo działa
-- `maxDistance` - limit dystansu jednego przesunięcia
+java {
+	withSourcesJar()
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
