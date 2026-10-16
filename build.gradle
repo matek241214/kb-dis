@@ -10,7 +10,18 @@ base {
 	archivesName = project.archives_base_name
 }
 
-repositories {
+// Płaski układ repo: pliki .java i .json leżą w głównym katalogu
+sourceSets {
+	main {
+		java {
+			srcDirs = ['.']
+			include '*.java'
+		}
+		resources {
+			srcDirs = ['.']
+			include 'fabric.mod.json', 'knockback-displacement.mixins.json'
+		}
+	}
 }
 
 dependencies {
@@ -36,11 +47,4 @@ java {
 	withSourcesJar()
 	sourceCompatibility = JavaVersion.VERSION_21
 	targetCompatibility = JavaVersion.VERSION_21
-}
-
-jar {
-	inputs.property "archivesName", project.base.archivesName
-	from("LICENSE") {
-		rename { "${it}_${inputs.properties.archivesName}" }
-	}
 }
